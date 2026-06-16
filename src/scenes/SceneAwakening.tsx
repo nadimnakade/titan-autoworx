@@ -35,9 +35,9 @@ export function SceneAwakening() {
         { y: 0, opacity: 1, duration: 1.2, ease: "expo.out", delay: 1.7 },
       );
       gsap.fromTo(
-        ".hero-stat",
+        ".hero-hud",
         { y: 20, opacity: 0 },
-        { y: 0, opacity: 1, duration: 1, ease: "expo.out", stagger: 0.1, delay: 2 },
+        { y: 0, opacity: 1, duration: 1, ease: "expo.out", stagger: 0.08, delay: 2 },
       );
 
       // Scroll-out (headline exits as we leave)
@@ -184,7 +184,7 @@ export function SceneAwakening() {
       {/* HUD bottom-left telemetry */}
       <div
         ref={hudRef}
-        className="hero-corner absolute bottom-24 left-6 md:left-12 z-[2] hidden md:flex flex-col gap-2 max-w-xs"
+        className="hero-hud absolute bottom-24 left-6 md:left-12 z-[2] hidden md:flex flex-col gap-2 max-w-xs"
       >
         <div className="titan-label">TELEMETRY // ACTIVE</div>
         <div className="grid grid-cols-3 gap-3 font-mono text-[10px]">
@@ -219,7 +219,7 @@ export function SceneAwakening() {
       </div>
 
       {/* Bottom-right KPIs */}
-      <div className="hero-corner absolute bottom-24 right-6 md:right-12 z-[2] hidden md:flex flex-col items-end gap-1">
+      <div className="hero-hud absolute bottom-24 right-6 md:right-12 z-[2] hidden md:flex flex-col items-end gap-1">
         <div className="titan-label">CUMULATIVE // 17 YEARS</div>
         <div className="flex items-baseline gap-2">
           <span className="titan-display text-titan-bone text-6xl">
