@@ -15,6 +15,7 @@ export function SceneAwakening() {
   const sectionRef = useRef<HTMLElement | null>(null);
   const hudRef = useRef<HTMLDivElement | null>(null);
   const blueprintRef = useRef<SVGSVGElement | null>(null);
+  const canvasRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -40,6 +41,44 @@ export function SceneAwakening() {
         { y: 0, opacity: 1, duration: 1, ease: "expo.out", stagger: 0.08, delay: 2 },
       );
 
+      gsap.to(blueprintRef.current, {
+        rotate: 360,
+        duration: 32,
+        repeat: -1,
+        ease: "none",
+      });
+
+      gsap.to(hudRef.current, {
+        y: -10,
+        duration: 2.8,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut",
+      });
+
+      gsap.to(canvasRef.current, {
+        scale: 1.12,
+        yPercent: -6,
+        ease: "none",
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top top",
+          end: "bottom top",
+          scrub: 1.1,
+        },
+      });
+
+      gsap.to(".hero-grid-parallax", {
+        yPercent: 18,
+        ease: "none",
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top top",
+          end: "bottom top",
+          scrub: 0.8,
+        },
+      });
+
       // Scroll-out (headline exits as we leave)
       gsap.to(".hero-headline-wrap", {
         yPercent: -30,
@@ -63,12 +102,12 @@ export function SceneAwakening() {
       className="relative h-screen w-full overflow-hidden bg-titan-void grain"
     >
       {/* Background layers */}
-      <div className="absolute inset-0 grid-lines opacity-30" />
+      <div className="hero-grid-parallax absolute inset-0 grid-lines opacity-30" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_50%,rgba(232,69,60,0.15),transparent_60%)]" />
       <Aurora colors={["#E8453C", "#C8312A", "#13181F"]} blur={150} opacity={0.35} />
 
       {/* 3D Canvas */}
-      <div className="absolute inset-0 z-0">
+      <div ref={canvasRef} className="absolute inset-0 z-0 will-change-transform">
         <HeroCanvas />
       </div>
 

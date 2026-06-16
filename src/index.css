@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600&family=Oswald:wght@300;400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Sora:wght@300;400;500;600;700;800&family=Teko:wght@400;500;600;700&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -17,7 +17,7 @@
   html,
   body {
     @apply bg-titan-void text-titan-bone;
-    font-family: "Inter", system-ui, sans-serif;
+    font-family: "Sora", system-ui, sans-serif;
     overflow-x: hidden;
   }
 
@@ -53,11 +53,11 @@
   }
 
   .titan-label {
-    @apply font-mono text-[10px] tracking-[0.4em] text-titan-steel/70 uppercase;
+    @apply font-mono text-[10px] tracking-[0.42em] text-titan-steel/70 uppercase;
   }
 
   .titan-display {
-    @apply font-display uppercase leading-[0.85] tracking-tight;
+    @apply font-display uppercase leading-[0.82] tracking-[0.02em];
   }
 
   .clip-corner {
@@ -145,6 +145,10 @@
   .mask-radial {
     mask-image: radial-gradient(circle at center, black 50%, transparent 80%);
     -webkit-mask-image: radial-gradient(circle at center, black 50%, transparent 80%);
+  }
+
+  .mask-diagonal {
+    clip-path: polygon(0 0, 100% 0, 100% 86%, 82% 100%, 0 100%);
   }
 
   .no-scrollbar::-webkit-scrollbar {

@@ -15,8 +15,8 @@ export default {
         },
       },
       fontFamily: {
-        display: ["'Oswald'", "system-ui", "sans-serif"],
-        sans: ["'Inter'", "system-ui", "sans-serif"],
+        display: ["'Teko'", "system-ui", "sans-serif"],
+        sans: ["'Sora'", "system-ui", "sans-serif"],
         mono: ["'JetBrains Mono'", "ui-monospace", "monospace"],
       },
       animation: {

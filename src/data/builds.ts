@@ -14,6 +14,8 @@ export type Build = {
   story: string;
   hue: string; // gradient stop
   tag: string;
+  image: string;
+  imageAlt: string;
 };
 
 export const builds: Build[] = [
@@ -38,6 +40,9 @@ export const builds: Build[] = [
     story: "RHEA was born from a stripped 993 cabriolet. The flat-six was bored, balanced, and mated to a sequential box. We kept the soul of the air-cooled era and gave it the bite of a modern GT3.",
     hue: "from-titan-ember via-titan-ember/30 to-titan-void",
     tag: "FLAGSHIP BUILD",
+    image:
+      "https://images.pexels.com/photos/3954783/pexels-photo-3954783.jpeg?auto=compress&cs=tinysrgb&w=1800",
+    imageAlt: "White Porsche 911 photographed on a road",
   },
   {
     id: "nyx",
@@ -60,6 +65,9 @@ export const builds: Build[] = [
     story: "NYX was a customer's vision: the fastest street-legal R35 in EMEA. We delivered. Twin turbos, E85 mapping, and a chassis geometry honed on the Nordschleife.",
     hue: "from-titan-gold via-titan-ember/30 to-titan-void",
     tag: "QUARTER-MILE KING",
+    image:
+      "https://images.pexels.com/photos/12392999/pexels-photo-12392999.jpeg?auto=compress&cs=tinysrgb&w=1800",
+    imageAlt: "Silver Nissan GT-R photographed from the side on asphalt",
   },
   {
     id: "atlas",
@@ -82,6 +90,9 @@ export const builds: Build[] = [
     story: "ATLAS took 18 months. Every panel was templated in CAD, then laid in prepreg carbon. The V10 howls through hand-fabricated Inconel — a sound you feel in your chest.",
     hue: "from-titan-bone via-titan-steel/30 to-titan-void",
     tag: "ATELIER CARBON",
+    image:
+      "https://images.pexels.com/photos/12499769/pexels-photo-12499769.jpeg?auto=compress&cs=tinysrgb&w=1800",
+    imageAlt: "Blue Lamborghini Huracan photographed in an urban setting",
   },
   {
     id: "orion",
@@ -104,5 +115,8 @@ export const builds: Build[] = [
     story: "ORION was our love letter to the high-revving S54. We stroked the V8 to 4.4L, fitted ITBs, and set the rev limiter to 8,400 RPM. The result: an analog missile.",
     hue: "from-titan-ember via-titan-gold/30 to-titan-void",
     tag: "ANALOG ARMAGEDDON",
+    image:
+      "https://images.pexels.com/photos/5604213/pexels-photo-5604213.jpeg?auto=compress&cs=tinysrgb&w=1800",
+    imageAlt: "Yellow BMW M3 coupe photographed outdoors",
   },
 ];

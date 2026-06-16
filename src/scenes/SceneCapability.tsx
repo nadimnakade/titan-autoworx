@@ -32,13 +32,26 @@ export function SceneCapability() {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
+      gsap.to(".cap-field", {
+        yPercent: 16,
+        ease: "none",
+        scrollTrigger: {
+          trigger: ref.current,
+          start: "top bottom",
+          end: "bottom top",
+          scrub: true,
+        },
+      });
+
       gsap.utils.toArray<HTMLElement>(".cap-cell").forEach((el, i) => {
         gsap.fromTo(
           el,
-          { y: 80, opacity: 0 },
+          { y: 80, opacity: 0, rotateX: -12, scale: 0.95 },
           {
             y: 0,
             opacity: 1,
+            rotateX: 0,
+            scale: 1,
             duration: 1,
             ease: "expo.out",
             delay: i * 0.06,
@@ -74,9 +87,9 @@ export function SceneCapability() {
       ref={ref}
       className="relative w-full py-32 md:py-48 bg-titan-void grain overflow-hidden"
     >
-      <div className="absolute inset-0 grid-lines opacity-20" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_20%_30%,rgba(232,69,60,0.08),transparent_50%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_70%,rgba(242,193,78,0.06),transparent_50%)]" />
+      <div className="cap-field absolute inset-0 grid-lines opacity-20" />
+      <div className="cap-field absolute inset-0 bg-[radial-gradient(ellipse_at_20%_30%,rgba(232,69,60,0.08),transparent_50%)]" />
+      <div className="cap-field absolute inset-0 bg-[radial-gradient(ellipse_at_80%_70%,rgba(242,193,78,0.06),transparent_50%)]" />
 
       <div className="relative max-w-7xl mx-auto px-6 md:px-12">
         {/* Header */}

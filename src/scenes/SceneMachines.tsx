@@ -2,141 +2,79 @@ import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "@/components/ui/SplitText";
-import { Counter } from "@/components/ui/Counter";
 import { builds } from "@/data/builds";
-import { motion, useScroll, useTransform } from "framer-motion";
-import { ChevronRight, Gauge, Wrench } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 
 gsap.registerPlugin(ScrollTrigger);
 
-function BuildArtwork({ build, index }: { build: (typeof builds)[0]; index: number }) {
-  // Generate a procedural car silhouette SVG
+function BuildPhotoPanel({ build }: { build: (typeof builds)[0] }) {
   return (
-    <div className={`relative w-full h-full bg-gradient-to-br ${build.hue}`}>
-      {/* Background grid */}
-      <div className="absolute inset-0 grid-lines opacity-30" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_50%,rgba(232,69,60,0.2),transparent_60%)]" />
+    <div className="relative h-full">
+      <div className={`absolute inset-0 bg-gradient-to-br ${build.hue}`} />
+      <div className="absolute inset-0 grid-lines opacity-20" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_18%,rgba(242,193,78,0.16),transparent_24%)]" />
 
-      {/* Procedural car silhouette - varies by index */}
-      <svg
-        className="absolute inset-0 w-full h-full"
-        viewBox="0 0 800 400"
-        preserveAspectRatio="xMidYMid meet"
-      >
-        <defs>
-          <linearGradient id={`body-${build.id}`} x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#13181F" />
-            <stop offset="60%" stopColor="#0A0D12" />
-            <stop offset="100%" stopColor="#C8312A" stopOpacity="0.6" />
-          </linearGradient>
-          <linearGradient id={`glow-${build.id}`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#E8453C" stopOpacity="0.8" />
-            <stop offset="100%" stopColor="#E8453C" stopOpacity="0" />
-          </linearGradient>
-        </defs>
+      <div className="machine-image-shell absolute inset-0 overflow-hidden clip-corner">
+        <img
+          src={build.image}
+          alt={build.imageAlt}
+          className="machine-photo h-full w-full object-cover"
+          loading="eager"
+        />
+        <div className="absolute inset-0 bg-[linear-gradient(110deg,rgba(10,13,18,0.85)_0%,rgba(10,13,18,0.18)_45%,rgba(10,13,18,0.82)_100%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,transparent_10%,rgba(10,13,18,0.35)_70%,rgba(10,13,18,0.9)_100%)]" />
+        <div className="machine-flare absolute inset-y-0 -left-1/4 w-1/3 bg-gradient-to-r from-transparent via-white/20 to-transparent blur-2xl opacity-0" />
+      </div>
 
-        {/* Spotlight cone */}
-        <ellipse cx="400" cy="380" rx="320" ry="20" fill="#E8453C" opacity="0.15" />
+      <div className="absolute inset-y-8 left-8 right-8 pointer-events-none">
+        <div className="absolute left-0 top-0 titan-label text-titan-bone/70">
+          LIVE BUILD VISUAL
+        </div>
+        <div className="absolute right-0 top-0 font-mono text-[10px] tracking-[0.35em] text-titan-ember">
+          {build.idx}
+        </div>
+        <div className="absolute left-0 bottom-0 right-0 h-px machine-line bg-gradient-to-r from-titan-ember via-titan-gold to-transparent" />
+        <div className="absolute left-0 top-6 bottom-6 w-px machine-line bg-gradient-to-b from-titan-ember to-transparent" />
+      </div>
 
-        {/* Car body - 911-style */}
-        {index % 4 === 0 && (
-          <g>
-            <path
-              d="M120 290 Q 140 220 200 200 L 280 170 Q 360 150 440 150 L 540 160 Q 620 170 660 220 L 690 270 Q 700 290 690 310 L 120 310 Q 110 300 120 290 Z"
-              fill={`url(#body-${build.id})`}
-              stroke="#E8453C"
-              strokeWidth="1"
-            />
-            <path
-              d="M260 200 L 360 175 L 480 175 L 560 200 L 530 220 L 300 220 Z"
-              fill="#0A0D12"
-              opacity="0.85"
-            />
-            <ellipse cx="190" cy="305" rx="40" ry="20" fill="#0A0D12" stroke="#F2C14E" strokeWidth="1.5" />
-            <ellipse cx="620" cy="305" rx="40" ry="20" fill="#0A0D12" stroke="#F2C14E" strokeWidth="1.5" />
-            <ellipse cx="190" cy="305" rx="20" ry="10" fill="#13181F" />
-            <ellipse cx="620" cy="305" rx="20" ry="10" fill="#13181F" />
-            <path d="M120 280 L 80 290 L 60 285" stroke="#E8453C" strokeWidth="3" fill="none" />
-            <path d="M690 280 L 730 290 L 750 285" stroke="#E8453C" strokeWidth="3" fill="none" />
-          </g>
-        )}
+      <div className="absolute right-5 top-20 hidden lg:grid gap-3 w-44 z-10">
+        <div className="machine-data-plate clip-corner-sm border border-white/10 bg-black/25 p-2 backdrop-blur-md">
+          <img
+            src={build.image}
+            alt=""
+            aria-hidden
+            className="h-24 w-full object-cover clip-corner-sm opacity-90"
+            style={{ objectPosition: "center 28%" }}
+          />
+        </div>
+        <div className="machine-data-plate clip-corner-sm border border-white/10 bg-black/25 p-2 backdrop-blur-md">
+          <img
+            src={build.image}
+            alt=""
+            aria-hidden
+            className="h-20 w-full object-cover clip-corner-sm opacity-90"
+            style={{ objectPosition: "center 72%" }}
+          />
+        </div>
+      </div>
 
-        {/* GT-R style */}
-        {index % 4 === 1 && (
-          <g>
-            <path
-              d="M100 290 Q 110 230 160 210 L 250 180 Q 350 160 450 160 L 570 170 Q 660 180 700 230 L 720 280 Q 720 305 705 310 L 110 310 Q 95 305 100 290 Z"
-              fill={`url(#body-${build.id})`}
-              stroke="#E8453C"
-              strokeWidth="1"
-            />
-            <path
-              d="M280 200 L 380 178 L 480 178 L 560 200 L 530 220 L 320 220 Z"
-              fill="#0A0D12"
-              opacity="0.85"
-            />
-            <path d="M250 165 L 290 155 L 580 155 L 620 165 L 600 178 L 270 178 Z" fill="#0A0D12" />
-            <ellipse cx="180" cy="305" rx="40" ry="20" fill="#0A0D12" stroke="#F2C14E" strokeWidth="1.5" />
-            <ellipse cx="640" cy="305" rx="42" ry="22" fill="#0A0D12" stroke="#F2C14E" strokeWidth="1.5" />
-            <ellipse cx="180" cy="305" rx="20" ry="10" fill="#13181F" />
-            <ellipse cx="640" cy="305" rx="22" ry="11" fill="#13181F" />
-            <path d="M100 280 L 60 290" stroke="#E8453C" strokeWidth="3" fill="none" />
-          </g>
-        )}
-
-        {/* Huracán style */}
-        {index % 4 === 2 && (
-          <g>
-            <path
-              d="M100 300 Q 100 240 150 215 L 250 180 Q 360 155 470 155 L 590 165 Q 680 175 720 230 L 730 280 Q 730 305 715 310 L 100 310 Q 90 305 100 300 Z"
-              fill={`url(#body-${build.id})`}
-              stroke="#E8453C"
-              strokeWidth="1"
-            />
-            <path
-              d="M280 195 L 380 175 L 480 175 L 560 195 L 530 220 L 320 220 Z"
-              fill="#0A0D12"
-              opacity="0.85"
-            />
-            <path d="M340 200 L 460 200 L 470 215 L 330 215 Z" fill="#E8453C" opacity="0.6" />
-            <ellipse cx="180" cy="305" rx="42" ry="22" fill="#0A0D12" stroke="#F2C14E" strokeWidth="1.5" />
-            <ellipse cx="640" cy="305" rx="42" ry="22" fill="#0A0D12" stroke="#F2C14E" strokeWidth="1.5" />
-            <path d="M100 280 L 60 290" stroke="#E8453C" strokeWidth="3" fill="none" />
-          </g>
-        )}
-
-        {/* M3 style */}
-        {index % 4 === 3 && (
-          <g>
-            <path
-              d="M120 290 Q 130 220 190 200 L 280 175 Q 370 155 460 155 L 560 165 Q 640 180 680 230 L 700 280 Q 700 305 685 310 L 120 310 Q 110 305 120 290 Z"
-              fill={`url(#body-${build.id})`}
-              stroke="#E8453C"
-              strokeWidth="1"
-            />
-            <path
-              d="M270 195 L 370 175 L 480 175 L 550 195 L 520 220 L 310 220 Z"
-              fill="#0A0D12"
-              opacity="0.85"
-            />
-            <ellipse cx="190" cy="305" rx="40" ry="20" fill="#0A0D12" stroke="#F2C14E" strokeWidth="1.5" />
-            <ellipse cx="630" cy="305" rx="40" ry="20" fill="#0A0D12" stroke="#F2C14E" strokeWidth="1.5" />
-            <path d="M120 280 L 80 290" stroke="#E8453C" strokeWidth="3" fill="none" />
-            {/* Twin exhaust */}
-            <rect x="640" y="270" width="8" height="20" fill="#0A0D12" stroke="#F2C14E" />
-            <rect x="660" y="270" width="8" height="20" fill="#0A0D12" stroke="#F2C14E" />
-          </g>
-        )}
-
-        {/* Index overlay */}
-        <text x="40" y="40" fill="#AAB2BD" fontSize="11" fontFamily="JetBrains Mono" letterSpacing="2">
-          {build.idx} / 0{builds.length} · {build.codename}
-        </text>
-        <text x="40" y="370" fill="#F2C14E" fontSize="9" fontFamily="JetBrains Mono" letterSpacing="2">
-          [PROCEDURAL PREVIEW — VEHICLE 1:18]
-        </text>
-        <line x1="40" y1="50" x2="200" y2="50" stroke="#E8453C" strokeWidth="0.5" />
-      </svg>
+      <div className="absolute bottom-0 left-0 right-0 z-10 p-6 md:p-8 bg-gradient-to-t from-titan-void via-titan-void/72 to-transparent">
+        <div className="machine-copy titan-label">{build.tag}</div>
+        <div className="machine-copy mt-2 flex items-end justify-between gap-4">
+          <div>
+            <h3 className="titan-display text-titan-bone text-[clamp(3.8rem,9vw,8rem)] leading-[0.8]">
+              {build.codename}
+            </h3>
+            <div className="font-mono text-sm tracking-[0.24em] text-titan-ember mt-2">
+              {build.chassis} · {build.year}
+            </div>
+          </div>
+          <div className="hidden md:flex flex-col items-end font-mono text-[10px] tracking-[0.28em] text-titan-steel/70">
+            <span>PHOTO PLATE //</span>
+            <span>{build.power}</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -151,6 +89,17 @@ export function SceneMachines() {
       const track = trackRef.current;
       if (!track) return;
       const distance = () => track.scrollWidth - window.innerWidth;
+
+      gsap.to(".machines-backdrop", {
+        yPercent: 18,
+        ease: "none",
+        scrollTrigger: {
+          trigger: ref.current,
+          start: "top bottom",
+          end: "bottom top",
+          scrub: true,
+        },
+      });
 
       const horizontalTween = gsap.to(track, {
         x: () => -distance(),
@@ -169,19 +118,190 @@ export function SceneMachines() {
         },
       });
 
-      // Parallax image inside each panel
-      gsap.utils.toArray<HTMLElement>(".machine-art").forEach((art) => {
-        gsap.to(art, {
-          xPercent: -12,
-          ease: "none",
-          scrollTrigger: {
-            trigger: art,
-            containerAnimation: horizontalTween,
-            start: "left right",
-            end: "right left",
-            scrub: true,
+      gsap.utils.toArray<HTMLElement>(".machine-card").forEach((card) => {
+        const imageShell = card.querySelector<HTMLElement>(".machine-image-shell");
+        const photo = card.querySelector<HTMLElement>(".machine-photo");
+        const copy = card.querySelectorAll<HTMLElement>(".machine-copy");
+        const stats = card.querySelectorAll<HTMLElement>(".machine-stat");
+        const specs = card.querySelectorAll<HTMLElement>(".machine-spec-row");
+        const lines = card.querySelectorAll<HTMLElement>(".machine-line");
+        const dataPlates = card.querySelectorAll<HTMLElement>(".machine-data-plate");
+        const flare = card.querySelector<HTMLElement>(".machine-flare");
+
+        gsap.fromTo(
+          card,
+          { opacity: 0.35, scale: 0.94, rotateX: -8 },
+          {
+            opacity: 1,
+            scale: 1,
+            rotateX: 0,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: card,
+              containerAnimation: horizontalTween,
+              start: "left 72%",
+              end: "center center",
+              scrub: true,
+            },
           },
-        });
+        );
+
+        if (imageShell) {
+          gsap.fromTo(
+            imageShell,
+            { clipPath: "inset(0 100% 0 0)" },
+            {
+              clipPath: "inset(0 0% 0 0)",
+              ease: "expo.out",
+              scrollTrigger: {
+                trigger: card,
+                containerAnimation: horizontalTween,
+                start: "left 82%",
+                end: "left 52%",
+                scrub: true,
+              },
+            },
+          );
+        }
+
+        if (photo) {
+          gsap.fromTo(
+            photo,
+            { scale: 1.28, filter: "brightness(0.38) saturate(0.8)" },
+            {
+              scale: 1,
+              filter: "brightness(0.9) saturate(1.05)",
+              ease: "none",
+              scrollTrigger: {
+                trigger: card,
+                containerAnimation: horizontalTween,
+                start: "left right",
+                end: "right left",
+                scrub: true,
+              },
+            },
+          );
+        }
+
+        if (flare) {
+          gsap.fromTo(
+            flare,
+            { xPercent: -150, opacity: 0 },
+            {
+              xPercent: 280,
+              opacity: 0.75,
+              ease: "none",
+              scrollTrigger: {
+                trigger: card,
+                containerAnimation: horizontalTween,
+                start: "left 75%",
+                end: "right 20%",
+                scrub: true,
+              },
+            },
+          );
+        }
+
+        if (copy.length) {
+          gsap.fromTo(
+            copy,
+            { y: 60, opacity: 0 },
+            {
+              y: 0,
+              opacity: 1,
+              stagger: 0.08,
+              ease: "expo.out",
+              scrollTrigger: {
+                trigger: card,
+                containerAnimation: horizontalTween,
+                start: "left 75%",
+                end: "left 58%",
+                scrub: true,
+              },
+            },
+          );
+        }
+
+        if (stats.length) {
+          gsap.fromTo(
+            stats,
+            { y: 34, opacity: 0 },
+            {
+              y: 0,
+              opacity: 1,
+              stagger: 0.05,
+              ease: "power3.out",
+              scrollTrigger: {
+                trigger: card,
+                containerAnimation: horizontalTween,
+                start: "left 66%",
+                end: "left 44%",
+                scrub: true,
+              },
+            },
+          );
+        }
+
+        if (specs.length) {
+          gsap.fromTo(
+            specs,
+            { x: 28, opacity: 0 },
+            {
+              x: 0,
+              opacity: 1,
+              stagger: 0.04,
+              ease: "power3.out",
+              scrollTrigger: {
+                trigger: card,
+                containerAnimation: horizontalTween,
+                start: "left 60%",
+                end: "left 38%",
+                scrub: true,
+              },
+            },
+          );
+        }
+
+        if (lines.length) {
+          gsap.fromTo(
+            lines,
+            { scaleX: 0, scaleY: 0, transformOrigin: "left center" },
+            {
+              scaleX: 1,
+              scaleY: 1,
+              stagger: 0.06,
+              ease: "expo.out",
+              scrollTrigger: {
+                trigger: card,
+                containerAnimation: horizontalTween,
+                start: "left 72%",
+                end: "left 46%",
+                scrub: true,
+              },
+            },
+          );
+        }
+
+        if (dataPlates.length) {
+          gsap.fromTo(
+            dataPlates,
+            { x: 32, opacity: 0, rotateY: -16 },
+            {
+              x: 0,
+              opacity: 1,
+              rotateY: 0,
+              stagger: 0.06,
+              ease: "power3.out",
+              scrollTrigger: {
+                trigger: card,
+                containerAnimation: horizontalTween,
+                start: "left 62%",
+                end: "left 40%",
+                scrub: true,
+              },
+            },
+          );
+        }
       });
     }, ref);
     return () => ctx.revert();
@@ -191,106 +311,97 @@ export function SceneMachines() {
     <section
       id="machines"
       ref={ref}
-      className="relative w-full h-screen bg-titan-void grain overflow-hidden"
+      className="relative h-screen w-full overflow-hidden bg-titan-void grain"
     >
-      {/* HUD top */}
-      <div className="absolute top-24 left-6 md:left-12 z-30">
-        <div className="flex items-center gap-3 mb-2">
+      <div className="machines-backdrop absolute inset-0 grid-lines opacity-20" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_20%,rgba(232,69,60,0.12),transparent_30%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_78%,rgba(242,193,78,0.08),transparent_28%)]" />
+
+      <div className="absolute top-20 left-6 md:left-12 z-30">
+        <div className="flex items-center gap-3 mb-3">
           <span className="h-1.5 w-1.5 rounded-full bg-titan-ember animate-pulse" />
-          <span className="titan-label">SCENE 04 // THE BUILDS</span>
+          <span className="titan-label">SCENE 04 // THE MACHINES WE BUILD</span>
         </div>
-        <h2 className="titan-display text-titan-bone text-5xl md:text-7xl">
-          <SplitText text="MACHINES" trigger as="span" className="block" />
-          <span className="block text-titan-ember">WE FORGE.</span>
+        <h2 className="titan-display text-titan-bone text-[clamp(3.5rem,8vw,7.5rem)] leading-[0.82]">
+          <SplitText text="REAL MACHINES." trigger as="span" className="block" />
+          <span className="block text-titan-ember">REAL PHOTOGRAPHY.</span>
         </h2>
       </div>
 
-      <div className="absolute top-24 right-6 md:right-12 z-30 text-right">
+      <div className="absolute top-20 right-6 md:right-12 z-30 text-right">
         <div className="titan-label">SHOWING</div>
         <div className="titan-display text-titan-bone text-5xl">
-          0{active + 1} <span className="text-titan-ember text-2xl">/ 0{builds.length}</span>
+          {String(active + 1).padStart(2, "0")}
+          <span className="text-titan-ember text-2xl">
+            {" "}
+            / {String(builds.length).padStart(2, "0")}
+          </span>
         </div>
-        <div className="titan-label mt-2">HORIZONTAL SCROLL</div>
+        <div className="font-mono text-[10px] tracking-[0.28em] text-titan-steel mt-2">
+          HORIZONTAL STORY DRIVE
+        </div>
       </div>
 
-      {/* Horizontal track */}
       <div
         ref={trackRef}
-        className="absolute top-1/2 -translate-y-1/2 left-0 flex h-[80vh] gap-8 pl-[6vw] pr-[6vw] will-change-transform"
+        className="absolute left-0 top-1/2 flex h-[82vh] -translate-y-1/2 gap-10 pl-[6vw] pr-[8vw] will-change-transform"
       >
-        {builds.map((b, i) => (
+        {builds.map((build) => (
           <article
-            key={b.id}
-            className="relative shrink-0 w-[88vw] md:w-[80vw] max-w-[1100px] grid md:grid-cols-12 gap-6 h-full"
+            key={build.id}
+            className="machine-card relative grid h-full w-[92vw] max-w-[1380px] shrink-0 gap-6 md:w-[86vw] md:grid-cols-12"
           >
-            {/* Image / Artwork */}
-            <div className="md:col-span-7 h-full relative overflow-hidden clip-corner border border-titan-steel/10">
-              <div className="machine-art absolute inset-0 scale-110">
-                <BuildArtwork build={b} index={i} />
-              </div>
-              {/* Codename overlay */}
-              <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-titan-void via-titan-void/70 to-transparent z-10">
-                <div className="titan-label">{b.tag}</div>
-                <h3 className="titan-display text-titan-bone text-6xl md:text-8xl mt-1">
-                  {b.codename}
-                </h3>
-                <div className="font-mono text-sm text-titan-ember mt-1">
-                  {b.chassis} · {b.year}
-                </div>
-              </div>
-              {/* Top-right corner index */}
-              <div className="absolute top-4 right-4 titan-mono z-10">{b.idx}</div>
+            <div className="relative h-full overflow-hidden clip-corner border border-titan-steel/10 md:col-span-7">
+              <BuildPhotoPanel build={build} />
             </div>
 
-            {/* Info */}
-            <div className="md:col-span-5 h-full flex flex-col justify-between">
-              <div>
-                <div className="titan-label mb-2">// BRIEF</div>
-                <p className="text-titan-bone text-xl leading-snug">
-                  {b.description}
+            <div className="flex h-full flex-col justify-between md:col-span-5">
+              <div className="machine-copy">
+                <div className="mb-3 titan-label">// BUILD DOSSIER</div>
+                <div className="machine-line mb-5 h-px w-24 bg-gradient-to-r from-titan-ember to-transparent" />
+                <p className="max-w-lg text-2xl leading-snug text-titan-bone md:text-3xl">
+                  {build.description}
                 </p>
-                <p className="text-titan-steel text-sm leading-relaxed mt-4">
-                  {b.story}
+                <p className="mt-5 max-w-lg text-sm leading-relaxed text-titan-steel md:text-[15px]">
+                  {build.story}
                 </p>
               </div>
 
-              {/* Big stats */}
-              <div className="grid grid-cols-2 gap-4 my-6">
-                <div>
+              <div className="grid grid-cols-2 gap-4 py-8">
+                <div className="machine-stat border-l-2 border-titan-ember/70 pl-3">
                   <div className="titan-label">POWER</div>
-                  <div className="titan-display text-titan-ember text-4xl">
-                    {b.power}
+                  <div className="titan-display text-5xl leading-none text-titan-ember">
+                    {build.power}
                   </div>
                 </div>
-                <div>
+                <div className="machine-stat border-l-2 border-titan-gold/70 pl-3">
                   <div className="titan-label">TORQUE</div>
-                  <div className="titan-display text-titan-bone text-4xl">
-                    {b.torque}
+                  <div className="titan-display text-5xl leading-none text-titan-bone">
+                    {build.torque}
                   </div>
                 </div>
-                <div>
+                <div className="machine-stat border-l-2 border-titan-steel/70 pl-3">
                   <div className="titan-label">0—100 KM/H</div>
-                  <div className="titan-display text-titan-bone text-4xl">
-                    {b.zeroSixty}
+                  <div className="titan-display text-4xl leading-none text-titan-bone">
+                    {build.zeroSixty}
                   </div>
                 </div>
-                <div>
+                <div className="machine-stat border-l-2 border-titan-ember/30 pl-3">
                   <div className="titan-label">TOP SPEED</div>
-                  <div className="titan-display text-titan-bone text-4xl">
-                    {b.topSpeed}
+                  <div className="titan-display text-4xl leading-none text-titan-bone">
+                    {build.topSpeed}
                   </div>
                 </div>
               </div>
 
-              {/* Specs list */}
-              <div className="space-y-1 border-t border-titan-steel/10 pt-3">
-                {b.specs.map((s) => (
+              <div className="space-y-2 border-t border-titan-steel/10 pt-4">
+                {build.specs.map((spec) => (
                   <div
-                    key={s.k}
-                    className="grid grid-cols-2 gap-2 font-mono text-[11px]"
+                    key={spec.k}
+                    className="machine-spec-row grid grid-cols-2 gap-4 border-b border-white/5 pb-2 font-mono text-[11px] tracking-[0.18em]"
                   >
-                    <span className="text-titan-steel/60">{s.k}</span>
-                    <span className="text-titan-bone text-right">{s.v}</span>
+                    <span className="text-titan-steel/60">{spec.k}</span>
+                    <span className="text-right text-titan-bone">{spec.v}</span>
                   </div>
                 ))}
               </div>
@@ -299,36 +410,36 @@ export function SceneMachines() {
         ))}
       </div>
 
-      {/* Progress bar */}
-      <div className="absolute bottom-12 left-6 right-6 md:left-12 md:right-12 z-30">
+      <div className="absolute bottom-12 left-6 right-6 z-30 md:left-12 md:right-12">
         <div className="flex items-center gap-4">
           <div className="titan-label whitespace-nowrap">
             {String(active + 1).padStart(2, "0")} / {String(builds.length).padStart(2, "0")}
           </div>
-          <div className="flex-1 h-px bg-titan-steel/20 relative">
-            {builds.map((_, i) => (
+          <div className="relative h-px flex-1 bg-titan-steel/20">
+            <div
+              className="absolute left-0 top-1/2 h-px -translate-y-1/2 bg-gradient-to-r from-titan-ember to-titan-gold"
+              style={{
+                width: `${(active / (builds.length - 1)) * 100}%`,
+                transition: "width 0.35s ease",
+              }}
+            />
+            {builds.map((_, index) => (
               <div
-                key={i}
-                className="absolute top-1/2 -translate-y-1/2 h-2 w-2 rounded-full"
+                key={index}
+                className="absolute top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full border"
                 style={{
-                  left: `${(i / (builds.length - 1)) * 100}%`,
-                  background:
-                    i <= active ? "#E8453C" : "rgba(170,178,189,0.3)",
-                  transform: `translate(-50%, -50%) scale(${i === active ? 1.4 : 1})`,
-                  transition: "all 0.4s",
+                  left: `${(index / (builds.length - 1)) * 100}%`,
+                  background: index <= active ? "#E8453C" : "rgba(170,178,189,0.15)",
+                  borderColor: index <= active ? "#E8453C" : "rgba(170,178,189,0.35)",
+                  transform: `translate(-50%, -50%) scale(${index === active ? 1.32 : 1})`,
+                  transition: "all 0.35s ease",
                 }}
               />
             ))}
-            <div
-              className="absolute top-1/2 -translate-y-1/2 left-0 h-px bg-titan-ember"
-              style={{
-                width: `${(active / (builds.length - 1)) * 100}%`,
-                transition: "width 0.4s",
-              }}
-            />
           </div>
-          <div className="titan-label whitespace-nowrap flex items-center gap-2">
-            SCROLL <ChevronRight className="h-3 w-3" />
+          <div className="flex items-center gap-2 titan-label whitespace-nowrap">
+            SCROLL
+            <ChevronRight className="h-3 w-3" />
           </div>
         </div>
       </div>
