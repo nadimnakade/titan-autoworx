@@ -1,4 +1,4 @@
-import { type ReactNode } from "react";
+import { type HTMLAttributes, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 /**
@@ -26,9 +26,11 @@ export function BentoGrid({
 export function BentoCell({
   children,
   className,
-}: {
-  children: ReactNode;
-  className?: string;
-}) {
-  return <div className={cn("relative", className)}>{children}</div>;
+  ...props
+}: { children: ReactNode; className?: string } & HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div className={cn("relative", className)} {...props}>
+      {children}
+    </div>
+  );
 }

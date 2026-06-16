@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Environment } from "@react-three/drei";
 import {
@@ -50,10 +50,25 @@ function ScanLaser() {
 }
 
 export function HeroCanvas() {
+  const [quality, setQuality] = useState<"high" | "low">("high");
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    const mem = (navigator as any).deviceMemory as number | undefined;
+    const cores = navigator.hardwareConcurrency || 4;
+    const lowEnd = !!reduced || (typeof mem === "number" && mem <= 4) || cores <= 4;
+    setQuality(lowEnd ? "low" : "high");
+  }, []);
+
+  const dpr: [number, number] = quality === "low" ? [1, 1.25] : [1, 1.6];
+  const particles = quality === "low" ? 650 : 1100;
+  const enableFx = quality !== "low";
+
   return (
     <Canvas
-      dpr={[1, 2]}
-      gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
+      dpr={dpr}
+      gl={{ antialias: quality === "high", alpha: true, powerPreference: "high-performance" }}
       camera={{ position: [0, 0.3, 5.5], fov: 38 }}
     >
       <color attach="background" args={["#0A0D12"]} />
@@ -74,7 +89,7 @@ export function HeroCanvas() {
 
       <SpartanHelmet />
       <TelemetryRings />
-      <ParticleField count={1400} />
+      <ParticleField count={particles} />
       <VolumetricFog />
       <ScanLaser />
 
@@ -82,17 +97,19 @@ export function HeroCanvas() {
 
       <Environment preset="warehouse" />
 
-      <EffectComposer multisampling={0}>
-        <Bloom
-          intensity={1.3}
-          luminanceThreshold={0.2}
-          luminanceSmoothing={0.9}
-          mipmapBlur
-        />
-        <Vignette eskil={false} offset={0.2} darkness={0.85} />
-        <Noise opacity={0.05} blendFunction={BlendFunction.OVERLAY} />
-        <Scanline density={1.2} opacity={0.05} blendFunction={BlendFunction.OVERLAY} />
-      </EffectComposer>
+      {enableFx && (
+        <EffectComposer multisampling={0}>
+          <Bloom
+            intensity={1.15}
+            luminanceThreshold={0.25}
+            luminanceSmoothing={0.9}
+            mipmapBlur
+          />
+          <Vignette eskil={false} offset={0.18} darkness={0.82} />
+          <Noise opacity={0.04} blendFunction={BlendFunction.OVERLAY} />
+          <Scanline density={1.1} opacity={0.04} blendFunction={BlendFunction.OVERLAY} />
+        </EffectComposer>
+      )}
     </Canvas>
   );
 }

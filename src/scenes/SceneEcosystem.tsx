@@ -11,9 +11,37 @@ export function SceneEcosystem() {
   const ref = useRef<HTMLElement | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
   const orbRef = useRef<HTMLDivElement | null>(null);
+  const crossRef = useRef<HTMLDivElement | null>(null);
+  const infoTitleRef = useRef<HTMLDivElement | null>(null);
+  const infoSubRef = useRef<HTMLDivElement | null>(null);
+  const droneRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
+      const el = ref.current;
+      const cleanup: Array<() => void> = [];
+      if (el && crossRef.current) {
+        const cross = crossRef.current;
+        const setX = gsap.quickTo(cross, "x", { duration: 0.25, ease: "power3.out" });
+        const setY = gsap.quickTo(cross, "y", { duration: 0.25, ease: "power3.out" });
+        const onMove = (e: MouseEvent) => {
+          setX(e.clientX);
+          setY(e.clientY);
+        };
+        const onLeave = () => {
+          gsap.to(cross, { autoAlpha: 0, duration: 0.25, ease: "power2.out" });
+        };
+        const onEnter = () => {
+          gsap.to(cross, { autoAlpha: 1, duration: 0.25, ease: "power2.out" });
+        };
+        el.addEventListener("mousemove", onMove);
+        el.addEventListener("mouseleave", onLeave);
+        el.addEventListener("mouseenter", onEnter);
+        cleanup.push(() => el.removeEventListener("mousemove", onMove));
+        cleanup.push(() => el.removeEventListener("mouseleave", onLeave));
+        cleanup.push(() => el.removeEventListener("mouseenter", onEnter));
+      }
+
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: ref.current,
@@ -21,6 +49,18 @@ export function SceneEcosystem() {
           end: "+=200%",
           scrub: 1,
           pin: true,
+          onUpdate: (self) => {
+            const idx = Math.min(
+              workshopNodes.length - 1,
+              Math.floor(self.progress * workshopNodes.length),
+            );
+            const n = workshopNodes[idx];
+            if (infoTitleRef.current) infoTitleRef.current.textContent = n.label;
+            if (infoSubRef.current) infoSubRef.current.textContent = n.sub;
+            const v = Math.min(1, Math.abs(self.getVelocity()) / 2600);
+            const stage = el?.querySelector<HTMLElement>(".workshop-stage");
+            if (stage) stage.style.filter = `saturate(${1 + v * 0.25}) contrast(${1 + v * 0.12})`;
+          },
         },
       });
 
@@ -45,6 +85,24 @@ export function SceneEcosystem() {
           i + 0.5,
         );
       });
+
+      const pathEl = svgRef.current?.querySelector<SVGPathElement>("#ws-route");
+      if (pathEl && droneRef.current) {
+        tl.to(
+          droneRef.current,
+          {
+            duration: 6,
+            ease: "none",
+            motionPath: {
+              path: pathEl,
+              align: pathEl,
+              alignOrigin: [0.5, 0.5],
+              autoRotate: false,
+            },
+          },
+          0,
+        );
+      }
 
       // Reveal
       gsap.utils.toArray<HTMLElement>(".ws-node").forEach((el, i) => {
@@ -88,6 +146,50 @@ export function SceneEcosystem() {
           delay: i * 0.3,
         });
       });
+
+      const nodeEls = gsap.utils.toArray<HTMLElement>(".ws-node");
+      const lineEls = gsap.utils.toArray<SVGLineElement>(".ws-conn");
+      nodeEls.forEach((nodeEl) => {
+        const id = nodeEl.id.replace("node-", "");
+        const onHoverEnter = () => {
+          const node = workshopNodes.find((n) => n.id === id);
+          if (node && infoTitleRef.current && infoSubRef.current) {
+            infoTitleRef.current.textContent = node.label;
+            infoSubRef.current.textContent = node.sub;
+          }
+          gsap.to(nodeEl, { scale: 1.18, duration: 0.35, ease: "expo.out" });
+          lineEls.forEach((l) => {
+            const a = l.getAttribute("data-a");
+            const b = l.getAttribute("data-b");
+            const active = a === id || b === id;
+            gsap.to(l, {
+              opacity: active ? 0.95 : 0.12,
+              strokeWidth: active ? 0.3 : 0.15,
+              duration: 0.25,
+              ease: "power2.out",
+            });
+          });
+        };
+        const onHoverLeave = () => {
+          gsap.to(nodeEl, { scale: 1, duration: 0.35, ease: "expo.out" });
+          lineEls.forEach((l) => {
+            gsap.to(l, {
+              opacity: 0.6,
+              strokeWidth: 0.15,
+              duration: 0.25,
+              ease: "power2.out",
+            });
+          });
+        };
+        nodeEl.addEventListener("mouseenter", onHoverEnter);
+        nodeEl.addEventListener("mouseleave", onHoverLeave);
+        cleanup.push(() => nodeEl.removeEventListener("mouseenter", onHoverEnter));
+        cleanup.push(() => nodeEl.removeEventListener("mouseleave", onHoverLeave));
+      });
+
+      return () => {
+        cleanup.forEach((fn) => fn());
+      };
     }, ref);
     return () => ctx.revert();
   }, []);
@@ -114,6 +216,16 @@ export function SceneEcosystem() {
       className="relative w-full h-screen bg-titan-void grain overflow-hidden"
     >
       <div className="absolute inset-0 grid-lines workshop-grid opacity-20" />
+      <div
+        ref={crossRef}
+        className="pointer-events-none fixed left-0 top-0 z-[60] -translate-x-1/2 -translate-y-1/2 opacity-0"
+      >
+        <div className="relative">
+          <div className="absolute -left-6 top-1/2 h-px w-12 bg-gradient-to-r from-transparent via-titan-ember/70 to-transparent" />
+          <div className="absolute left-1/2 -top-6 h-12 w-px bg-gradient-to-b from-transparent via-titan-ember/70 to-transparent" />
+          <div className="h-1.5 w-1.5 rounded-full bg-titan-gold/80" />
+        </div>
+      </div>
 
       {/* HUD label */}
       <div className="absolute top-24 left-6 md:left-12 z-20">
@@ -133,6 +245,18 @@ export function SceneEcosystem() {
         <div className="titan-label">FLOOR AREA</div>
         <div className="titan-display text-titan-bone text-4xl">14,200<span className="text-titan-ember text-xl">m²</span></div>
         <div className="titan-label mt-2">8 DEPARTMENTS</div>
+      </div>
+
+      <div className="absolute top-[10.5rem] left-1/2 -translate-x-1/2 z-20 hidden lg:block">
+        <div className="clip-corner-sm border border-titan-steel/15 bg-titan-carbon/35 backdrop-blur-xl px-6 py-4 text-center">
+          <div className="titan-label">ACTIVE SYSTEM</div>
+          <div ref={infoTitleRef} className="titan-display text-titan-bone text-4xl mt-1">
+            DESIGN LOFT
+          </div>
+          <div ref={infoSubRef} className="font-mono text-[10px] tracking-[0.32em] text-titan-ember mt-1">
+            Concept & CAD
+          </div>
+        </div>
       </div>
 
       {/* The blueprint stage */}
@@ -169,6 +293,13 @@ export function SceneEcosystem() {
             viewBox="0 0 100 100"
             preserveAspectRatio="none"
           >
+            <path
+              id="ws-route"
+              d="M 50 18 C 30 22, 22 38, 22 38 C 40 44, 78 36, 84 60 C 66 62, 28 84, 72 84"
+              fill="none"
+              stroke="rgba(242,193,78,0.0)"
+              strokeWidth="0.5"
+            />
             {connections.map(([a, b], i) => {
               const na = nodeMap[a];
               const nb = nodeMap[b];
@@ -180,6 +311,8 @@ export function SceneEcosystem() {
                   y1={na.y}
                   x2={nb.x}
                   y2={nb.y}
+                  data-a={a}
+                  data-b={b}
                   stroke="#E8453C"
                   strokeWidth="0.15"
                   strokeDasharray="0.8 0.4"
@@ -192,6 +325,17 @@ export function SceneEcosystem() {
             })}
           </svg>
 
+          <div
+            ref={droneRef}
+            className="pointer-events-none absolute left-0 top-0 -translate-x-1/2 -translate-y-1/2"
+            style={{ width: 0, height: 0 }}
+          >
+            <div className="relative">
+              <div className="absolute -inset-6 rounded-full bg-titan-ember/15 blur-xl" />
+              <div className="h-2.5 w-2.5 rounded-full bg-titan-gold" />
+            </div>
+          </div>
+
           {/* Workshop nodes */}
           {workshopNodes.map((n) => (
             <div
@@ -202,7 +346,7 @@ export function SceneEcosystem() {
             >
               <div className="relative">
                 <div className="ws-pulse absolute inset-0 -m-2 rounded-full border border-titan-ember/60" />
-                <div className="relative h-12 w-12 rounded-full bg-titan-carbon/90 border border-titan-ember/40 grid place-items-center backdrop-blur-sm hover:scale-110 transition-transform cursor-pointer group">
+                <div className="relative h-12 w-12 rounded-full bg-titan-carbon/90 border border-titan-ember/40 grid place-items-center backdrop-blur-sm transition-transform cursor-pointer group">
                   <div className="h-1.5 w-1.5 rounded-full bg-titan-ember group-hover:bg-titan-gold" />
                 </div>
                 <div className="absolute top-14 left-1/2 -translate-x-1/2 whitespace-nowrap text-center">

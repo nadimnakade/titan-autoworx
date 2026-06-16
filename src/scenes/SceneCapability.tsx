@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { type CSSProperties, useEffect, useMemo, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { BentoGrid, BentoCell } from "@/components/ui/Bento";
@@ -29,6 +29,20 @@ const accentColor: Record<string, string> = {
 
 export function SceneCapability() {
   const ref = useRef<HTMLElement | null>(null);
+  const motionRef = useRef<HTMLDivElement | null>(null);
+  const [focus, setFocus] = useState<string | null>(null);
+
+  const nodes = useMemo(
+    () => [
+      { id: "engine", x: 18, y: 28 },
+      { id: "ecu", x: 46, y: 18 },
+      { id: "aero", x: 74, y: 28 },
+      { id: "chassis", x: 30, y: 64 },
+      { id: "interior", x: 56, y: 70 },
+      { id: "track", x: 80, y: 60 },
+    ],
+    [],
+  );
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -77,6 +91,48 @@ export function SceneCapability() {
           },
         );
       });
+
+      const el = ref.current;
+      const motionEl = motionRef.current;
+      if (el && motionEl) {
+        let mx = 0;
+        let my = 0;
+        const setX = gsap.quickTo(motionEl, "x", { duration: 0.6, ease: "power3.out" });
+        const setY = gsap.quickTo(motionEl, "y", { duration: 0.6, ease: "power3.out" });
+        const setRot = gsap.quickTo(motionEl, "rotation", { duration: 0.9, ease: "power3.out" });
+
+        const onMove = (e: MouseEvent) => {
+          const r = el.getBoundingClientRect();
+          const nx = (e.clientX - r.left) / r.width - 0.5;
+          const ny = (e.clientY - r.top) / r.height - 0.5;
+          mx = nx;
+          my = ny;
+          setX(nx * 40);
+          setY(ny * 30);
+          setRot(nx * 2.5);
+          el.style.setProperty("--mx", `${(nx + 0.5) * 100}%`);
+          el.style.setProperty("--my", `${(ny + 0.5) * 100}%`);
+        };
+
+        el.addEventListener("mousemove", onMove);
+
+        const st = ScrollTrigger.create({
+          trigger: el,
+          start: "top bottom",
+          end: "bottom top",
+          onUpdate: (self) => {
+            const v = Math.min(1, Math.abs(self.getVelocity()) / 3000);
+            el.style.setProperty("--sv", v.toFixed(3));
+            setX(mx * 40 + v * 18);
+            setY(my * 30 - v * 12);
+          },
+        });
+
+        return () => {
+          el.removeEventListener("mousemove", onMove);
+          st.kill();
+        };
+      }
     }, ref);
     return () => ctx.revert();
   }, []);
@@ -90,6 +146,18 @@ export function SceneCapability() {
       <div className="cap-field absolute inset-0 grid-lines opacity-20" />
       <div className="cap-field absolute inset-0 bg-[radial-gradient(ellipse_at_20%_30%,rgba(232,69,60,0.08),transparent_50%)]" />
       <div className="cap-field absolute inset-0 bg-[radial-gradient(ellipse_at_80%_70%,rgba(242,193,78,0.06),transparent_50%)]" />
+      <div
+        ref={motionRef}
+        className="pointer-events-none absolute inset-0 opacity-70"
+        style={
+          {
+            background:
+              "radial-gradient(800px circle at var(--mx, 50%) var(--my, 40%), rgba(232,69,60, calc(0.12 + var(--sv, 0) * 0.22)), transparent 55%), radial-gradient(650px circle at calc(var(--mx, 50%) + 14%) calc(var(--my, 40%) + 18%), rgba(242,193,78, calc(0.08 + var(--sv, 0) * 0.18)), transparent 60%)",
+            mixBlendMode: "screen",
+            willChange: "transform",
+          } as CSSProperties
+        }
+      />
 
       <div className="relative max-w-7xl mx-auto px-6 md:px-12">
         {/* Header */}
@@ -115,17 +183,68 @@ export function SceneCapability() {
               disciplines. We own them.
             </p>
           </div>
-          <div className="md:col-span-3 flex flex-col gap-3 justify-end">
+          <div className="md:col-span-3 flex flex-col gap-4 justify-end">
             <div className="border-l-2 border-titan-ember pl-4">
               <div className="titan-label">SYSTEMS ACTIVE</div>
               <div className="titan-display text-titan-bone text-5xl">
                 <Counter to={6} duration={1.2} />
               </div>
             </div>
-            <div className="border-l-2 border-titan-gold pl-4">
-              <div className="titan-label">ENGINEERS ON FLOOR</div>
-              <div className="titan-display text-titan-bone text-5xl">
-                <Counter to={38} duration={1.4} />
+
+            <div className="clip-corner-sm border border-titan-steel/15 bg-titan-carbon/35 backdrop-blur-xl p-4">
+              <div className="flex items-center justify-between">
+                <div className="titan-label">CAPABILITY BUS</div>
+                <div className="font-mono text-[10px] tracking-[0.28em] text-titan-ember">
+                  LIVE
+                </div>
+              </div>
+              <div className="mt-3 relative h-28">
+                <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
+                  <defs>
+                    <radialGradient id="cap-node-glow" cx="50%" cy="50%" r="50%">
+                      <stop offset="0%" stopColor="#E8453C" stopOpacity="0.6" />
+                      <stop offset="100%" stopColor="#E8453C" stopOpacity="0" />
+                    </radialGradient>
+                  </defs>
+                  <path
+                    d="M 10 55 C 22 38, 36 26, 50 24 C 64 22, 78 34, 92 52"
+                    fill="none"
+                    stroke="rgba(170,178,189,0.25)"
+                    strokeWidth="0.6"
+                    strokeDasharray="2 2"
+                  />
+                  <path
+                    d="M 14 72 C 28 64, 40 62, 52 68 C 64 74, 76 74, 90 60"
+                    fill="none"
+                    stroke="rgba(232,69,60,0.28)"
+                    strokeWidth="0.6"
+                    strokeDasharray="1.2 2.2"
+                  />
+                  {nodes.map((n) => (
+                    <g key={n.id}>
+                      <circle
+                        cx={n.x}
+                        cy={n.y}
+                        r={focus === n.id ? 9 : 7}
+                        fill="url(#cap-node-glow)"
+                        opacity={focus === n.id ? 1 : 0.55}
+                      />
+                      <circle
+                        cx={n.x}
+                        cy={n.y}
+                        r={focus === n.id ? 2.8 : 2.2}
+                        fill={focus === n.id ? "#F2C14E" : "#E8453C"}
+                        opacity={0.95}
+                      />
+                    </g>
+                  ))}
+                </svg>
+                <div className="absolute inset-x-0 bottom-0 flex items-center justify-between">
+                  <div className="titan-label">BUS LOAD</div>
+                  <div className="font-mono text-[10px] tracking-[0.3em] text-titan-bone">
+                    {focus ? focus.toUpperCase() : "IDLE"}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -137,7 +256,12 @@ export function SceneCapability() {
             const Icon = iconMap[c.id] || Cpu;
             const isWide = c.id === "engine" || c.id === "aero" || c.id === "ecu";
             return (
-              <BentoCell key={c.id} className={`cap-cell ${c.span}`}>
+              <BentoCell
+                key={c.id}
+                className={`cap-cell ${c.span}`}
+                onMouseEnter={() => setFocus(c.id)}
+                onMouseLeave={() => setFocus(null)}
+              >
                 <SpotlightCard
                   className="h-full group"
                   spotlightColor={accentColor[c.accent]}

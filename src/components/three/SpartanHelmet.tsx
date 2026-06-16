@@ -104,7 +104,7 @@ export function SpartanHelmet() {
     <group ref={groupRef} position={[0, 0, 0]}>
       {/* Main skull */}
       <mesh material={carbon} castShadow receiveShadow scale={[1.05, 1.15, 1.1]}>
-        <sphereGeometry args={[1, 64, 64]} />
+        <sphereGeometry args={[1, 48, 48]} />
       </mesh>
 
       {/* Cheek guards */}

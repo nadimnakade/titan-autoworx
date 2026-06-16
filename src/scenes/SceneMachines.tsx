@@ -7,7 +7,23 @@ import { ChevronRight } from "lucide-react";
 
 gsap.registerPlugin(ScrollTrigger);
 
-function BuildPhotoPanel({ build }: { build: (typeof builds)[0] }) {
+function withWidth(url: string, width: number) {
+  if (url.includes("w=")) return url.replace(/w=\d+/g, `w=${width}`);
+  const join = url.includes("?") ? "&" : "?";
+  return `${url}${join}w=${width}`;
+}
+
+function BuildPhotoPanel({
+  build,
+  priority,
+}: {
+  build: (typeof builds)[0];
+  priority: boolean;
+}) {
+  const src1600 = withWidth(build.image, 1600);
+  const src900 = withWidth(build.image, 900);
+  const src520 = withWidth(build.image, 520);
+
   return (
     <div className="relative h-full">
       <div className={`absolute inset-0 bg-gradient-to-br ${build.hue}`} />
@@ -16,10 +32,13 @@ function BuildPhotoPanel({ build }: { build: (typeof builds)[0] }) {
 
       <div className="machine-image-shell absolute inset-0 overflow-hidden clip-corner">
         <img
-          src={build.image}
+          src={src1600}
+          srcSet={`${src900} 900w, ${src1600} 1600w`}
+          sizes="(min-width: 1024px) 60vw, 92vw"
           alt={build.imageAlt}
           className="machine-photo h-full w-full object-cover"
-          loading="eager"
+          loading={priority ? "eager" : "lazy"}
+          decoding="async"
         />
         <div className="absolute inset-0 bg-[linear-gradient(110deg,rgba(10,13,18,0.85)_0%,rgba(10,13,18,0.18)_45%,rgba(10,13,18,0.82)_100%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,transparent_10%,rgba(10,13,18,0.35)_70%,rgba(10,13,18,0.9)_100%)]" />
@@ -40,20 +59,24 @@ function BuildPhotoPanel({ build }: { build: (typeof builds)[0] }) {
       <div className="absolute right-5 top-20 hidden lg:grid gap-3 w-44 z-10">
         <div className="machine-data-plate clip-corner-sm border border-white/10 bg-black/25 p-2 backdrop-blur-md">
           <img
-            src={build.image}
+            src={src520}
             alt=""
             aria-hidden
             className="h-24 w-full object-cover clip-corner-sm opacity-90"
             style={{ objectPosition: "center 28%" }}
+            loading="lazy"
+            decoding="async"
           />
         </div>
         <div className="machine-data-plate clip-corner-sm border border-white/10 bg-black/25 p-2 backdrop-blur-md">
           <img
-            src={build.image}
+            src={src520}
             alt=""
             aria-hidden
             className="h-20 w-full object-cover clip-corner-sm opacity-90"
             style={{ objectPosition: "center 72%" }}
+            loading="lazy"
+            decoding="async"
           />
         </div>
       </div>
@@ -128,178 +151,92 @@ export function SceneMachines() {
         const dataPlates = card.querySelectorAll<HTMLElement>(".machine-data-plate");
         const flare = card.querySelector<HTMLElement>(".machine-flare");
 
-        gsap.fromTo(
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: card,
+            containerAnimation: horizontalTween,
+            start: "left 78%",
+            end: "left 28%",
+            scrub: true,
+          },
+        });
+
+        tl.fromTo(
           card,
           { opacity: 0.35, scale: 0.94, rotateX: -8 },
-          {
-            opacity: 1,
-            scale: 1,
-            rotateX: 0,
-            ease: "power3.out",
-            scrollTrigger: {
-              trigger: card,
-              containerAnimation: horizontalTween,
-              start: "left 72%",
-              end: "center center",
-              scrub: true,
-            },
-          },
+          { opacity: 1, scale: 1, rotateX: 0, ease: "none" },
+          0,
         );
 
         if (imageShell) {
-          gsap.fromTo(
+          tl.fromTo(
             imageShell,
             { clipPath: "inset(0 100% 0 0)" },
-            {
-              clipPath: "inset(0 0% 0 0)",
-              ease: "expo.out",
-              scrollTrigger: {
-                trigger: card,
-                containerAnimation: horizontalTween,
-                start: "left 82%",
-                end: "left 52%",
-                scrub: true,
-              },
-            },
+            { clipPath: "inset(0 0% 0 0)", ease: "none" },
+            0,
           );
         }
 
         if (photo) {
-          gsap.fromTo(
+          tl.fromTo(
             photo,
-            { scale: 1.28, filter: "brightness(0.38) saturate(0.8)" },
-            {
-              scale: 1,
-              filter: "brightness(0.9) saturate(1.05)",
-              ease: "none",
-              scrollTrigger: {
-                trigger: card,
-                containerAnimation: horizontalTween,
-                start: "left right",
-                end: "right left",
-                scrub: true,
-              },
-            },
+            { scale: 1.22, filter: "brightness(0.48) saturate(0.9)" },
+            { scale: 1, filter: "brightness(0.92) saturate(1.05)", ease: "none" },
+            0,
           );
         }
 
         if (flare) {
-          gsap.fromTo(
+          tl.fromTo(
             flare,
             { xPercent: -150, opacity: 0 },
-            {
-              xPercent: 280,
-              opacity: 0.75,
-              ease: "none",
-              scrollTrigger: {
-                trigger: card,
-                containerAnimation: horizontalTween,
-                start: "left 75%",
-                end: "right 20%",
-                scrub: true,
-              },
-            },
-          );
-        }
-
-        if (copy.length) {
-          gsap.fromTo(
-            copy,
-            { y: 60, opacity: 0 },
-            {
-              y: 0,
-              opacity: 1,
-              stagger: 0.08,
-              ease: "expo.out",
-              scrollTrigger: {
-                trigger: card,
-                containerAnimation: horizontalTween,
-                start: "left 75%",
-                end: "left 58%",
-                scrub: true,
-              },
-            },
-          );
-        }
-
-        if (stats.length) {
-          gsap.fromTo(
-            stats,
-            { y: 34, opacity: 0 },
-            {
-              y: 0,
-              opacity: 1,
-              stagger: 0.05,
-              ease: "power3.out",
-              scrollTrigger: {
-                trigger: card,
-                containerAnimation: horizontalTween,
-                start: "left 66%",
-                end: "left 44%",
-                scrub: true,
-              },
-            },
-          );
-        }
-
-        if (specs.length) {
-          gsap.fromTo(
-            specs,
-            { x: 28, opacity: 0 },
-            {
-              x: 0,
-              opacity: 1,
-              stagger: 0.04,
-              ease: "power3.out",
-              scrollTrigger: {
-                trigger: card,
-                containerAnimation: horizontalTween,
-                start: "left 60%",
-                end: "left 38%",
-                scrub: true,
-              },
-            },
+            { xPercent: 280, opacity: 0.65, ease: "none" },
+            0,
           );
         }
 
         if (lines.length) {
-          gsap.fromTo(
+          tl.fromTo(
             lines,
             { scaleX: 0, scaleY: 0, transformOrigin: "left center" },
-            {
-              scaleX: 1,
-              scaleY: 1,
-              stagger: 0.06,
-              ease: "expo.out",
-              scrollTrigger: {
-                trigger: card,
-                containerAnimation: horizontalTween,
-                start: "left 72%",
-                end: "left 46%",
-                scrub: true,
-              },
-            },
+            { scaleX: 1, scaleY: 1, stagger: 0.06, ease: "none" },
+            0.06,
           );
         }
 
         if (dataPlates.length) {
-          gsap.fromTo(
+          tl.fromTo(
             dataPlates,
             { x: 32, opacity: 0, rotateY: -16 },
-            {
-              x: 0,
-              opacity: 1,
-              rotateY: 0,
-              stagger: 0.06,
-              ease: "power3.out",
-              scrollTrigger: {
-                trigger: card,
-                containerAnimation: horizontalTween,
-                start: "left 62%",
-                end: "left 40%",
-                scrub: true,
-              },
-            },
+            { x: 0, opacity: 1, rotateY: 0, stagger: 0.06, ease: "none" },
+            0.1,
+          );
+        }
+
+        if (copy.length) {
+          tl.fromTo(
+            copy,
+            { y: 54, opacity: 0 },
+            { y: 0, opacity: 1, stagger: 0.08, ease: "none" },
+            0.12,
+          );
+        }
+
+        if (stats.length) {
+          tl.fromTo(
+            stats,
+            { y: 28, opacity: 0 },
+            { y: 0, opacity: 1, stagger: 0.05, ease: "none" },
+            0.18,
+          );
+        }
+
+        if (specs.length) {
+          tl.fromTo(
+            specs,
+            { x: 22, opacity: 0 },
+            { x: 0, opacity: 1, stagger: 0.04, ease: "none" },
+            0.22,
           );
         }
       });
@@ -352,7 +289,7 @@ export function SceneMachines() {
             className="machine-card relative grid h-full w-[92vw] max-w-[1380px] shrink-0 gap-6 md:w-[86vw] md:grid-cols-12"
           >
             <div className="relative h-full overflow-hidden clip-corner border border-titan-steel/10 md:col-span-7">
-              <BuildPhotoPanel build={build} />
+              <BuildPhotoPanel build={build} priority={build.idx === "01"} />
             </div>
 
             <div className="flex h-full flex-col justify-between md:col-span-5">
